@@ -45,7 +45,7 @@ public class MSigDB2BioPAXConverter {
     public Model convert(String msigdbFile) throws Exception {
         Model model = getBioPAXFactory().createModel();
         MSigDB mSigDB = ParserFactory.readMSigDB(new File(msigdbFile), true);
-        log.debug("Read the msigdb file: " + mSigDB.getNumGeneSets() + " gene sets in the file.");
+        log.info("Read the msigdb file: " + mSigDB.getNumGeneSets() + " gene sets in the file.");
 
         int cnt=0;
         for (GeneSetAnnotation annotation : mSigDB.getGeneSetAnnotations()) {
@@ -68,7 +68,7 @@ public class MSigDB2BioPAXConverter {
 
         }
 
-        log.debug("Converted " + cnt + " gene sets into BioPAX pathway.");
+        log.info("Converted " + cnt + " gene sets into BioPAX pathway.");
         return model;
     }
 

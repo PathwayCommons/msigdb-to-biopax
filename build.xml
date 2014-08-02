@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="msigdb2biopax" default="all">
   
-  
-  <property file="build.properties"/>
   <!-- Uncomment the following property if no tests compilation is needed -->
   <!-- 
   <property name="skip.tests" value="true"/>
@@ -60,44 +58,6 @@
     <include name="**/*.tsv"/>
   </patternset>
   
-  <!-- JDK definitions -->
-  
-  <property name="jdk.bin.1.7" value="${jdk.home.1.7}/bin"/>
-  <path id="jdk.classpath.1.7">
-    <fileset dir="${jdk.home.1.7}">
-      <include name="lib/ant-javafx.jar"/>
-      <include name="lib/dt.jar"/>
-      <include name="lib/javafx-doclet.jar"/>
-      <include name="lib/javafx-mx.jar"/>
-      <include name="lib/jconsole.jar"/>
-      <include name="lib/sa-jdi.jar"/>
-      <include name="lib/tools.jar"/>
-      <include name="jre/lib/charsets.jar"/>
-      <include name="jre/lib/deploy.jar"/>
-      <include name="jre/lib/htmlconverter.jar"/>
-      <include name="jre/lib/javaws.jar"/>
-      <include name="jre/lib/jce.jar"/>
-      <include name="jre/lib/jfr.jar"/>
-      <include name="jre/lib/jfxrt.jar"/>
-      <include name="jre/lib/JObjC.jar"/>
-      <include name="jre/lib/jsse.jar"/>
-      <include name="jre/lib/management-agent.jar"/>
-      <include name="jre/lib/plugin.jar"/>
-      <include name="jre/lib/resources.jar"/>
-      <include name="jre/lib/rt.jar"/>
-      <include name="jre/lib/ext/dnsns.jar"/>
-      <include name="jre/lib/ext/localedata.jar"/>
-      <include name="jre/lib/ext/sunec.jar"/>
-      <include name="jre/lib/ext/sunjce_provider.jar"/>
-      <include name="jre/lib/ext/sunpkcs11.jar"/>
-      <include name="jre/lib/ext/zipfs.jar"/>
-    </fileset>
-  </path>
-  
-  <property name="project.jdk.home" value="${jdk.home.1.7}"/>
-  <property name="project.jdk.bin" value="${jdk.bin.1.7}"/>
-  <property name="project.jdk.classpath" value="jdk.classpath.1.7"/>
-  
   
   <!-- Project Libraries -->
   
@@ -111,18 +71,6 @@
   
   
   <!-- Application Server Libraries -->
-  <!-- Register Custom Compiler Taskdefs -->
-  <property name="javac2.home" value="${idea.home}/lib"/>
-  <path id="javac2.classpath">
-    <pathelement location="${javac2.home}/javac2.jar"/>
-    <pathelement location="${javac2.home}/jdom.jar"/>
-    <pathelement location="${javac2.home}/asm4-all.jar"/>
-    <pathelement location="${javac2.home}/jgoodies-forms.jar"/>
-  </path>
-  <target name="register.custom.compilers">
-    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
-    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
-  </target>
   
   <!-- Modules -->
   
@@ -132,21 +80,18 @@
   <dirname property="module.msigdb2biopax.basedir" file="${ant.file}"/>
   
   
-  <property name="module.jdk.home.msigdb2biopax" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.msigdb2biopax" value="${project.jdk.bin}"/>
-  <property name="module.jdk.classpath.msigdb2biopax" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.msigdb2biopax" value="-encoding UTF-8 -source 1.6 ${compiler.args}"/>
+  <property name="compiler.args.msigdb2biopax" value="-encoding UTF-8 ${compiler.args}"/>
   
   <property name="msigdb2biopax.output.dir" value="${module.msigdb2biopax.basedir}/out/production/msigdb2biopax"/>
   <property name="msigdb2biopax.testoutput.dir" value="${module.msigdb2biopax.basedir}/out/test/msigdb2biopax"/>
+    <property name="msigdb2biopax.jar.dir" value="${module.msigdb2biopax.basedir}/out/jar/msigdb2biopax"/>
   
   <path id="msigdb2biopax.module.bootclasspath">
     <!-- Paths to be included in compilation bootclasspath -->
   </path>
   
   <path id="msigdb2biopax.module.production.classpath">
-    <path refid="${module.jdk.classpath.msigdb2biopax}"/>
     <path refid="library.lib.classpath"/>
   </path>
   
@@ -156,7 +101,6 @@
   </path>
   
   <path id="msigdb2biopax.module.classpath">
-    <path refid="${module.jdk.classpath.msigdb2biopax}"/>
     <pathelement location="${msigdb2biopax.output.dir}"/>
     <path refid="library.lib.classpath"/>
   </path>
@@ -185,15 +129,15 @@
   
   <target name="compile.module.msigdb2biopax" depends="compile.module.msigdb2biopax.production,compile.module.msigdb2biopax.tests" description="Compile module msigdb2biopax"/>
   
-  <target name="compile.module.msigdb2biopax.production" depends="register.custom.compilers" description="Compile module msigdb2biopax; production classes">
+  <target name="compile.module.msigdb2biopax.production" description="Compile module msigdb2biopax; production classes">
     <mkdir dir="${msigdb2biopax.output.dir}"/>
-    <javac2 destdir="${msigdb2biopax.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.msigdb2biopax}/javac">
+    <javac destdir="${msigdb2biopax.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.msigdb2biopax}"/>
       <bootclasspath refid="msigdb2biopax.module.bootclasspath"/>
       <classpath refid="msigdb2biopax.module.production.classpath"/>
       <src refid="msigdb2biopax.module.sourcepath"/>
       <patternset refid="excluded.from.compilation.msigdb2biopax"/>
-    </javac2>
+    </javac>
     
     <copy todir="${msigdb2biopax.output.dir}">
       <fileset dir="${module.msigdb2biopax.basedir}/src">
@@ -203,11 +147,12 @@
     </copy>
   </target>
   
-  <target name="compile.module.msigdb2biopax.tests" depends="register.custom.compilers,compile.module.msigdb2biopax.production" description="compile module msigdb2biopax; test classes" unless="skip.tests"/>
+  <target name="compile.module.msigdb2biopax.tests" depends="compile.module.msigdb2biopax.production" description="compile module msigdb2biopax; test classes" unless="skip.tests"/>
   
   <target name="clean.module.msigdb2biopax" description="cleanup module">
     <delete dir="${msigdb2biopax.output.dir}"/>
     <delete dir="${msigdb2biopax.testoutput.dir}"/>
+    <delete dir="${msigdb2biopax.jar.dir}"/>
   </target>
   
   <target name="init" description="Build initialization">
@@ -215,8 +160,21 @@
   </target>
   
   <target name="clean" depends="clean.module.msigdb2biopax" description="cleanup all"/>
+
+    <target name="jar">
+        <mkdir dir="${msigdb2biopax.jar.dir}"/>
+        <jar destfile="${msigdb2biopax.jar.dir}/msigdb2biopax.jar" basedir="${msigdb2biopax.output.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="com.google.gsoc14.msigdb2biopax.MSigDB2BioPAXConverterMain"/>
+            </manifest>
+            <!--<zipgroupfileset dir="${module.msigdb2biopax.basedir}/lib" includes="**/*.jar" />-->
+            <zipfileset src="${module.msigdb2biopax.basedir}/lib/paxtools-4.2.1-no-jena.jar" />
+            <zipfileset src="${module.msigdb2biopax.basedir}/lib/gsea2-2.1.0.jar" excludes="**/*.SF">
+            </zipfileset>
+        </jar>
+    </target>
   
-  <target name="build.modules" depends="init, clean, compile.module.msigdb2biopax" description="build all modules"/>
+  <target name="build.modules" depends="init, clean, compile.module.msigdb2biopax, jar" description="build all modules"/>
   
   <target name="all" depends="build.modules" description="build all"/>
 </project>

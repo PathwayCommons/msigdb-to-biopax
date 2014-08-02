@@ -21,17 +21,17 @@ public class MSigDB2BioPAXConverterMain {
         }
 
         String msigdbFile = args[0].trim();
-        log.debug("MSigDB File: " + msigdbFile);
+        log.info("MSigDB File: " + msigdbFile);
         MSigDB2BioPAXConverter converter = new MSigDB2BioPAXConverter();
         Model model = converter.convert(msigdbFile);
 
         SimpleIOHandler simpleIOHandler = new SimpleIOHandler();
         String outputFile = args[1].trim();
-        log.debug("Conversion done. Now exporting the BioPAX model as a file: " + outputFile);
+        log.info("Conversion done. Now exporting the BioPAX model as a file: " + outputFile);
         FileOutputStream outputStream = new FileOutputStream(outputFile);
         simpleIOHandler.convertToOWL(model, outputStream);
         outputStream.close();
 
-        log.debug("All done.");
+        log.info("All done.");
     }
 }
