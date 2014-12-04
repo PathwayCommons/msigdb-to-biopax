@@ -22,6 +22,16 @@ public class MSigDB2BioPAXConverter {
     private static Log log = LogFactory.getLog(MSigDB2BioPAXConverter.class);
     private final String symbolPattern = ".* (\\w+): .*";
 
+    private String XMLBase = "http://www.gene-regulation.com/#";
+
+    public String getXMLBase() {
+        return XMLBase;
+    }
+
+    public void setXMLBase(String XMLBase) {
+        this.XMLBase = XMLBase;
+    }
+
     private HGNCUtil hgncUtil = new HGNCUtil();
 
     public HGNCUtil getHgncUtil() {
@@ -68,6 +78,8 @@ public class MSigDB2BioPAXConverter {
 
         }
 
+        model.setXmlBase(getXMLBase());
+
         log.info("Converted " + cnt + " gene sets into BioPAX pathway.");
         return model;
     }
@@ -76,8 +88,12 @@ public class MSigDB2BioPAXConverter {
         return getBioPAXFactory().create(aClass, uri);
     }
 
+    protected String completeId(String partialId) {
+        return getXMLBase() + partialId;
+    }
+
     private Pathway createPathway(Model model, String symbol, GeneSetAnnotation annotation) {
-        Pathway pathway = create(Pathway.class, annotation.getLSIDName());
+        Pathway pathway = create(Pathway.class, completeId(annotation.getLSIDName()));
         model.add(pathway);
 
         String name = annotation.getStandardName();
@@ -98,7 +114,7 @@ public class MSigDB2BioPAXConverter {
 
         for (Gene tf : tfGenes) {
             Rna tfel = getGene(model, tf);
-            TemplateReactionRegulation regulation = create(TemplateReactionRegulation.class, "control_" + UUID.randomUUID());
+            TemplateReactionRegulation regulation = create(TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
             model.add(regulation);
             regulation.addController(tfel);
             String rname = annotation.getStandardName();
@@ -131,9 +147,9 @@ public class MSigDB2BioPAXConverter {
     private TemplateReaction getTranscriptionOf(Model model, Rna target) {
         // Make these transcription events unique
         String id = "transcription_" + target.getDisplayName() + "_" + UUID.randomUUID();
-        TemplateReaction templateReaction = (TemplateReaction) model.getByID(id);
+        TemplateReaction templateReaction = (TemplateReaction) model.getByID(completeId(id));
         if(templateReaction == null) {
-            templateReaction = create(TemplateReaction.class, id);
+            templateReaction = create(TemplateReaction.class, completeId(id));
             model.add(templateReaction);
             String tname = "Transcription of " + target.getDisplayName();
             templateReaction.setDisplayName(tname);
@@ -148,7 +164,7 @@ public class MSigDB2BioPAXConverter {
 
     private Rna getGene(Model model, Gene gene) {
         String id = gene.toString();
-        Rna rna = (Rna) model.getByID(id);
+        Rna rna = (Rna) model.getByID(completeId(id));
         if(rna == null) {
             rna = createGene(model, gene);
         }
@@ -156,11 +172,11 @@ public class MSigDB2BioPAXConverter {
     }
 
     private Rna createGene(Model model, Gene gene) {
-        Rna rna = create(Rna.class, gene.toString());
+        Rna rna = create(Rna.class, completeId(gene.toString()));
         model.add(rna);
         setNames(gene, rna);
 
-        RnaReference rnaReference = create(RnaReference.class, "ref" + gene.toString());
+        RnaReference rnaReference = create(RnaReference.class, completeId("ref" + gene.toString()));
         model.add(rnaReference);
         setNames(gene, rnaReference);
         assignXrefs(model, gene, rnaReference);
@@ -172,19 +188,19 @@ public class MSigDB2BioPAXConverter {
 
     private void assignXrefs(Model model, Gene gene, RnaReference rnaReference) {
         String geneStr = gene.toString() + "_" + UUID.randomUUID();
-        UnificationXref unificationXref = create(UnificationXref.class, "uxref_" + geneStr);
+        UnificationXref unificationXref = create(UnificationXref.class, completeId("uxref_" + geneStr));
         model.add(unificationXref);
         unificationXref.setDb("NCBI Gene");
         unificationXref.setId(gene.getEntrezId());
         rnaReference.addXref(unificationXref);
 
-        RelationshipXref relationshipXref = create(RelationshipXref.class, "rxref_" + geneStr);
+        RelationshipXref relationshipXref = create(RelationshipXref.class, completeId("rxref_" + geneStr));
         model.add(relationshipXref);
         relationshipXref.setDb("HGNC");
         relationshipXref.setId(gene.getHgncId());
         rnaReference.addXref(relationshipXref);
 
-        RelationshipXref symbolXref = create(RelationshipXref.class, "rxref_symbol_" + geneStr);
+        RelationshipXref symbolXref = create(RelationshipXref.class, completeId("rxref_symbol_" + geneStr));
         model.add(symbolXref);
         symbolXref.setDb("HGNC Symbol");
         symbolXref.setId(gene.getSymbol());
