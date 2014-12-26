@@ -9,7 +9,8 @@ import java.util.Set;
 
 public class HGNCUtil {
     private HashMap<String, HashSet<Gene>> symbol2gene = new HashMap<String, HashSet<Gene>>();
-    
+    private HashMap<String, HashSet<Gene>> synonym2gene = new HashMap<String, HashSet<Gene>>();
+
     public HGNCUtil() {
         InputStream inputStream = this.getClass().getResourceAsStream("hgnc_20140801.tsv");
         Scanner scanner = new Scanner(inputStream);
@@ -40,7 +41,7 @@ public class HGNCUtil {
     private void addGeneToTheMap(Gene gene) {
         addToGeneMap(gene.getSymbol(), gene);
         for (String s : gene.getSynonyms()) {
-            addToGeneMap(s, gene);
+            addToSynonymGeneMap(s, gene);
         }
     }
 
@@ -53,7 +54,22 @@ public class HGNCUtil {
         genes.add(gene);
     }
 
+    private void addToSynonymGeneMap(String s, Gene gene) {
+        HashSet<Gene> genes = synonym2gene.get(s);
+        if(genes == null) {
+            genes = new HashSet<Gene>();
+            synonym2gene.put(s, genes);
+        }
+        genes.add(gene);
+    }
+
+
     public Set<Gene> getGenes(String symbol) {
-        return symbol2gene.get(symbol);
+        // First look up the approved symbol and then go for the synonym
+        HashSet<Gene> genes = symbol2gene.get(symbol);
+        if(genes == null || genes.isEmpty()) {
+            genes = synonym2gene.get(symbol);
+        }
+        return genes;
     }
 }
