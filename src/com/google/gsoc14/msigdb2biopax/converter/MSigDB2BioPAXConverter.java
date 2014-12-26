@@ -111,37 +111,65 @@ public class MSigDB2BioPAXConverter {
             return null;
         }
 
-
-        for (Gene tf : tfGenes) {
-            Rna tfel = getGene(model, tf);
-            TemplateReactionRegulation regulation = create(TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
-            model.add(regulation);
-            regulation.addController(tfel);
-            String rname = annotation.getStandardName();
-            regulation.setControlType(ControlType.ACTIVATION);
-            regulation.setStandardName(rname);
-            regulation.setDisplayName(rname);
-            regulation.addName(rname);
-
-            pathway.addPathwayComponent(regulation);
-
-            for (Object o : annotation.getGeneSet(true).getMembers()) {
-                String tSymbol = o.toString();
-
-                Set<Gene> genes = hgncUtil.getGenes(tSymbol);
-                if(genes == null) { continue; }
-
-                for (Gene gene : genes) {
-                    Rna target = getGene(model, gene);
-                    TemplateReaction transcription = getTranscriptionOf(model, target);
-                    regulation.addControlled(transcription);
-                    pathway.addPathwayComponent(transcription);
-                }
+        Rna tfel;
+        if(tfGenes.size() > 1) {
+            // If more than one matches, then create a generic entity
+            tfel = getGenericGene(model, symbol);
+            for (Gene tfGene : tfGenes) {
+                Rna memberGene = getGene(model, tfGene);
+                tfel.getEntityReference().addMemberEntityReference(memberGene.getEntityReference());
             }
-
+        } else {
+            tfel = getGene(model, tfGenes.iterator().next());
         }
 
+        TemplateReactionRegulation regulation
+                = create(TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
+        model.add(regulation);
+        regulation.addController(tfel);
+        String rname = annotation.getStandardName();
+        regulation.setControlType(ControlType.ACTIVATION);
+        regulation.setStandardName(rname);
+        regulation.setDisplayName(rname);
+        regulation.addName(rname);
+
+        pathway.addPathwayComponent(regulation);
+
+        for (Object o : annotation.getGeneSet(true).getMembers()) {
+            String tSymbol = o.toString();
+
+            Set<Gene> genes = hgncUtil.getGenes(tSymbol);
+            if(genes == null) { continue; }
+
+            for (Gene gene : genes) {
+                Rna target = getGene(model, gene);
+                TemplateReaction transcription = getTranscriptionOf(model, target);
+                regulation.addControlled(transcription);
+                pathway.addPathwayComponent(transcription);
+            }
+        }
+
+
         return pathway;
+    }
+
+    private Rna getGenericGene(Model model, String name) {
+        String nid = name + "_" + UUID.randomUUID();
+        Rna rna = create(Rna.class, completeId("generic_" + nid));
+        model.add(rna);
+        rna.setDisplayName(name);
+        rna.addName(name);
+        rna.setStandardName(name);
+
+        RnaReference rnaReference = create(RnaReference.class, completeId("generic_ref" + nid));
+        model.add(rnaReference);
+        rnaReference.setStandardName(name);
+        rnaReference.setDisplayName(name);
+        rnaReference.addName(name);
+
+        rna.setEntityReference(rnaReference);
+
+        return rna;
     }
 
     private TemplateReaction getTranscriptionOf(Model model, Rna target) {
