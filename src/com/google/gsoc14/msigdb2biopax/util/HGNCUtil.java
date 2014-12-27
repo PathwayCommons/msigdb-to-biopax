@@ -12,7 +12,7 @@ public class HGNCUtil {
     private HashMap<String, HashSet<Gene>> synonym2gene = new HashMap<String, HashSet<Gene>>();
 
     public HGNCUtil() {
-        InputStream inputStream = this.getClass().getResourceAsStream("hgnc_20140801.tsv");
+        InputStream inputStream = this.getClass().getResourceAsStream("hgnc_custom_download.tsv");
         Scanner scanner = new Scanner(inputStream);
         scanner.nextLine(); // skip the header
 
@@ -30,7 +30,10 @@ public class HGNCUtil {
                 gene.getSynonyms().add(synonym);
             }
             gene.setRefseqId(tokens[4]);
-            gene.setEntrezId(tokens[5]);
+            for (String synonym : tokens[5].split(", ")) {
+                gene.getSynonyms().add(synonym);
+            }
+            gene.setEntrezId(tokens[6]);
 
             addGeneToTheMap(gene);
         }

@@ -122,18 +122,7 @@ public class MSigDB2BioPAXConverter {
         } else {
             tfel = getGene(model, tfGenes.iterator().next());
         }
-
-        TemplateReactionRegulation regulation
-                = create(TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
-        model.add(regulation);
-        regulation.addController(tfel);
-        String rname = annotation.getStandardName();
-        regulation.setControlType(ControlType.ACTIVATION);
-        regulation.setStandardName(rname);
-        regulation.setDisplayName(rname);
-        regulation.addName(rname);
-
-        pathway.addPathwayComponent(regulation);
+        assert tfel != null;
 
         for (Object o : annotation.getGeneSet(true).getMembers()) {
             String tSymbol = o.toString();
@@ -142,6 +131,17 @@ public class MSigDB2BioPAXConverter {
             if(genes == null) { continue; }
 
             for (Gene gene : genes) {
+                TemplateReactionRegulation regulation
+                        = create(TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
+                model.add(regulation);
+                regulation.addController(tfel);
+                String rname = annotation.getStandardName();
+                regulation.setControlType(ControlType.ACTIVATION);
+                regulation.setStandardName(rname);
+                regulation.setDisplayName(rname);
+                regulation.addName(rname);
+                pathway.addPathwayComponent(regulation);
+
                 Rna target = getGene(model, gene);
                 TemplateReaction transcription = getTranscriptionOf(model, target);
                 regulation.addControlled(transcription);
