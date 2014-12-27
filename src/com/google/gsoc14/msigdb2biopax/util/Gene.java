@@ -52,7 +52,7 @@ public class Gene {
 
     @Override
     public String toString()  {
-        return "gene_" + entrezId;
+        return "gene_" + (entrezId == null ? refseqId : entrezId);
     }
 
     @Override

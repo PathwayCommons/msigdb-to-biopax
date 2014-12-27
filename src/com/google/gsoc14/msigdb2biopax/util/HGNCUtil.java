@@ -15,6 +15,7 @@ public class HGNCUtil {
         InputStream inputStream = this.getClass().getResourceAsStream("hgnc_custom_download.tsv");
         Scanner scanner = new Scanner(inputStream);
         scanner.nextLine(); // skip the header
+        // HGNC ID	Approved Symbol	Synonyms	Entrez Gene ID	RefSeq IDs	Gene Family Tag
 
         while(scanner.hasNextLine()) {
             String line = scanner.nextLine();
@@ -29,11 +30,11 @@ public class HGNCUtil {
             for (String synonym : tokens[3].split(", ")) {
                 gene.getSynonyms().add(synonym);
             }
-            gene.setRefseqId(tokens[4]);
-            for (String synonym : tokens[5].split(", ")) {
+            gene.setEntrezId(tokens[4]);
+            gene.setRefseqId(tokens[5]);
+            for (String synonym : tokens[6].split(", ")) {
                 gene.getSynonyms().add(synonym);
             }
-            gene.setEntrezId(tokens[6]);
 
             addGeneToTheMap(gene);
         }
