@@ -1,10 +1,10 @@
 # msigdb-to-biopax
-Originated from https://bitbucket.org/armish/gsoc14 and will continue here.
+Originated from https://bitbucket.org/armish/gsoc14 and will continue here (ToDo).
 
-## MSigDB to BioPAX Level3 data converter
+## MSigDB (TRANSFAC) to BioPAX Level3 data converter
 This type of data sets are available from different resources, such as [TRANSFAC](http://www.biobase-international.com/gene-regulation), [JASPAR](http://jaspar.genereg.net/) and [ENCODE](http://www.genome.gov/Encode/) projects; but converting the data provided by these databases will require additional processing—e.g. mapping ChIP-Seq peaks to near-by genes or finding genes by binding motifs.
 
-The easiest way, however, to import this data type is to use [MSigDB](http://www.broadinstitute.org/gsea/msigdb/collections.jsp), where transcription factors and their predicted targets are present in GSEA format provided by TRANSFAC. These associations can be converted to BioPAX by transcription events regulated by corresponding transcription factors. 
+The easiest way, however, to import this data type is to use [MSigDB](http://www.broadinstitute.org/gsea/msigdb/collections.jsp), where transcription factors and their predicted targets are present in GSEA format provided by TRANSFAC. These associations can be converted to BioPAX by transcription events regulated by corresponding transcription factors.
 
 ### Data source
 - **Home page**: [http://www.broadinstitute.org/gsea/msigdb/collections.jsp](http://www.broadinstitute.org/gsea/msigdb/collections.jsp)
@@ -31,9 +31,9 @@ Below is a screenshot that shows a sample gene set converted into a `Pathway`:
 ![EVI1 targets as a BioPAX pathway](https://bitbucket.org/armish/gsoc14/downloads/goal5_screenshot_singlegeneset.png)
 
 ### Usage
-After checking out the repository, change your working directory to the [Goal5-MSigDB/msigdb2biopax](https://bitbucket.org/armish/gsoc14/src/default/Goal5-MSigDB/msigdb2biopax/?at=default):
+Check out (git clone) the repository, change to:
 
-	$ cd Goal5-MSigDB/msigdb2biopax
+	$ cd msigdb-to-biopax
 
 To compile the code and create an executable JAR file, run ant:
 
