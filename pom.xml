@@ -193,17 +193,18 @@
     </distributionManagement>
 
     <repositories>
-        <repository>
-            <id>ossrh</id>
-            <name>OSSRH Repository</name>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
+        <!--<repository>-->
+            <!--<id>ossrh</id>-->
+            <!--<name>OSSRH Repository</name>-->
+            <!--<url>https://oss.sonatype.org/content/groups/public/</url>-->
+        <!--</repository>-->
     </repositories>
 
     <dependencies>
         <dependency>
             <!-- This is a proprietary library.
             You have to manually download it and install in your local maven2 repo:
+            mvn install:install-file -DgroupId=edu.mit.broad -DartifactId=gsea2 -Dversion=2.2.3 -Dfile=gsea2-2.2.3.jar -Dpackaging=jaj
             -->
             <groupId>edu.mit.broad</groupId>
             <artifactId>gsea2</artifactId>
