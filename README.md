@@ -62,13 +62,13 @@ Check out (git clone) the repository, change to:
 
 	$ cd msigdb-to-biopax
 
-To compile the code and create an executable JAR file, run ant:
+To compile the code and create an executable JAR file, run:
 
-	$ ant
+	$ mvn clean package
 
 You can then run the converter as follows:
 
-	$ java -jar msigdb-to-biopax.jar 
+	$ java -jar target/msigdb-to-biopax.jar 
 	Usage: MsigdbToBiopax /path/to/msigdb_v4.0.xml /path/to/output.owl
 
 For the conversion, you need to download the MSigDB database as an XML file: [msigdb_v4.0.xml](http://www.broadinstitute.org/gsea/msigdb/download_file.jsp?filePath=/resources/msigdb/4.0/msigdb_v4.0.xml).
