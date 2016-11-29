@@ -24,7 +24,6 @@ public class MsigdbToBiopax {
         String outputFile = args[1].trim();
         FileOutputStream outputStream = new FileOutputStream(outputFile);
         simpleIOHandler.convertToOWL(model, outputStream);
-        outputStream.close();
         System.out.println("MsigdbToBiopax: all done.");
     }
 

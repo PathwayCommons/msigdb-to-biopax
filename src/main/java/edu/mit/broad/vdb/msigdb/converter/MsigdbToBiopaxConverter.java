@@ -12,6 +12,7 @@ import org.biopax.paxtools.model.level3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,9 +50,13 @@ public class MsigdbToBiopaxConverter {
         this.bioPAXFactory = bioPAXFactory;
     }
 
-    public Model convert(String msigdbFile) throws Exception {
+    public Model convert(final String msigdbFile) throws Exception {
+        return convert(msigdbFile, ParserFactory.createInputStream(msigdbFile));
+    }
+
+    public Model convert(final String fileName, final InputStream msigdbInputStream) throws Exception {
         Model model = getBioPAXFactory().createModel();
-        MSigDB mSigDB = ParserFactory.readMSigDB(msigdbFile, true, true);
+        MSigDB mSigDB = ParserFactory.readMSigDB(fileName, msigdbInputStream, true, true);
         log.info("Read the msigdb file: " + mSigDB.getNumGeneSets() + " gene sets in the file.");
 
         int cnt=0;
@@ -75,7 +80,6 @@ public class MsigdbToBiopaxConverter {
                     }
                 }
             }
-
         }
 
         model.setXmlBase(getXMLBase());
