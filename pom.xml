@@ -102,7 +102,7 @@
                                 </transformer>
                             </transformers>
                             <finalName>${project.name}</finalName>
-                            <!--<shadedArtifactAttached>true</shadedArtifactAttached>-->
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
