@@ -53,8 +53,9 @@ This project uses the MIT GSEA java library (gsea2-2*.jar), which is not open so
 and [this wiki page](http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/MSigDB_License) .
 So, one should first register there to download software and/or data at http://software.broadinstitute.org/gsea/downloads.jsp
 
-Next, install the gsea jar file into your local Maven2 repository (~/.m2/repository) with `mvn` command:
+Next, fix and install the gsea2 jar into your local Maven2 repository (~/.m2/repository) with `mvn` command:
 ```
+zip --delete gsea2-2.2.3.jar "junit/*"
 mvn install:install-file -DgroupId=edu.mit.broad -DartifactId=gsea2 -Dversion=2.2.3 -Dfile=gsea2-2.2.3.jar -Dpackaging=jar
 ```
 

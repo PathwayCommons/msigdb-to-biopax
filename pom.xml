@@ -4,12 +4,12 @@
 
     <groupId>pathwaycommons</groupId>
     <artifactId>msigdb-to-biopax</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>msigdb-to-biopax</name>
 
     <description>
-        MSigDB (TRANSFAC) to BioPAX Level3 data converter.
+        MSigDB C3 TFT motif gene sets to BioPAX Level3 data converter.
     </description>
 
     <url>https://biopax.github.io/PathwayCommons/${project.name}</url>
@@ -54,7 +54,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <paxtools.version>5.0.0-beta1</paxtools.version>
+        <paxtools.version>5.0.0</paxtools.version>
         <slf4j.version>1.7.7</slf4j.version>
         <github.global.server>github</github.global.server>
     </properties>
@@ -66,8 +66,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.5.1</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.8</source>
+                        <target>1.8</target>
                     </configuration>
                 </plugin>
             </plugins>
@@ -192,19 +192,12 @@
         <downloadUrl>http://www.pathwaycommons.org/archives/</downloadUrl>
     </distributionManagement>
 
-    <repositories>
-        <!--<repository>-->
-            <!--<id>ossrh</id>-->
-            <!--<name>OSSRH Repository</name>-->
-            <!--<url>https://oss.sonatype.org/content/groups/public/</url>-->
-        <!--</repository>-->
-    </repositories>
-
     <dependencies>
         <dependency>
             <!-- This is a proprietary library.
-            You have to manually download it and install in your local maven2 repo:
-            mvn install:install-file -DgroupId=edu.mit.broad -DartifactId=gsea2 -Dversion=2.2.3 -Dfile=gsea2-2.2.3.jar -Dpackaging=jaj
+            You have to manually download it, fix, and install in your local maven2 repo:
+            zip -delete gsea2-2.2.3.jar "junit/*"
+            mvn install:install-file -DgroupId=edu.mit.broad -DartifactId=gsea2 -Dversion=2.2.3 -Dfile=gsea2-2.2.3.jar -Dpackaging=jar
             -->
             <groupId>edu.mit.broad</groupId>
             <artifactId>gsea2</artifactId>

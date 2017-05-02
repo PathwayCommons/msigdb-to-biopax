@@ -61,21 +61,21 @@ public class MsigdbToBiopaxConverter {
 
         int cnt=0;
         final int numAnnotations = mSigDB.getNumGeneSets();
-        for (int i=0; i < numAnnotations; i++) {
+        for (int i=0; i < numAnnotations; i++)
+        {
+            GeneSetAnnotation annotation = mSigDB.getGeneSetAnnotation(i);
 
-            final GeneSetAnnotation annotation = mSigDB.getGeneSetAnnotation(i);
-            final GeneSetCategory category = annotation.getCategory();
-
-            // We are going to get only c3 human motif gene sets
+            GeneSetCategory category = annotation.getCategory();
+            // We are going to get only c3 human TFT (motif) gene sets
             if(category.getCode().equalsIgnoreCase("c3")
-                    && category.getName().equalsIgnoreCase("Motif")
-                    && annotation.getOrganism().getName().equalsIgnoreCase("Homo sapiens"))
+                 && category.getName().equalsIgnoreCase("motif")
+                 && annotation.getOrganism().getName().equalsIgnoreCase("homo sapiens"))
             {
                 String briefDesc = annotation.getDescription().getBrief();
-                if(briefDesc.contains("which matches annotation for")) {
+                if(briefDesc.contains("which matches annotation for")) { //TODO: won't work with MSigDB v6.0
                     if(briefDesc.matches(symbolPattern)) {
                         String symbol = briefDesc.replaceAll(symbolPattern, "$1");
-                        createPathway(model, symbol, annotation);
+                        convertGeneSet(model, symbol, annotation);
                         cnt++;
                     }
                 }
@@ -84,7 +84,7 @@ public class MsigdbToBiopaxConverter {
 
         model.setXmlBase(getXMLBase());
 
-        log.info("Converted " + cnt + " gene sets into BioPAX pathway.");
+        log.info("Converted " + cnt + " gene sets to a BioPAX sub-network.");
         return model;
     }
 
@@ -96,88 +96,73 @@ public class MsigdbToBiopaxConverter {
         return getXMLBase() + partialId;
     }
 
-    private Pathway createPathway(Model model, String symbol, GeneSetAnnotation annotation) {
-        Pathway pathway = create(Pathway.class, completeId(annotation.getLSIDName()));
-        model.add(pathway);
-
-        String name = annotation.getStandardName();
-        pathway.setStandardName(name);
-        pathway.setDisplayName(name);
-        pathway.addName(name);
-
-        pathway.addComment(annotation.getDescription().getBrief());
-        pathway.addComment(annotation.getDescription().getFull());
-        pathway.addComment(annotation.getCategory().getCode());
-        pathway.addComment(annotation.getCategory().getName());
-
+    private void convertGeneSet(Model model, String symbol, GeneSetAnnotation annotation)
+    {
         Set<Gene> tfGenes = hgncUtil.getGenes(symbol);
         if(tfGenes == null) {
             log.warn("Couldn't find transcription factor: " + symbol);
-            return null;
+            return;
         }
 
-        Rna tfel;
+        //create a TF
+        Protein tfel;
         if(tfGenes.size() > 1) {
             // If more than one matches, then create a generic entity
-            tfel = getGenericGene(model, symbol);
+            tfel = getGenericProtein(model, symbol);
             for (Gene tfGene : tfGenes) {
-                Rna memberGene = getGene(model, tfGene);
-                tfel.getEntityReference().addMemberEntityReference(memberGene.getEntityReference());
+                Protein member = getProtein(model, tfGene);
+                tfel.getEntityReference().addMemberEntityReference(member.getEntityReference());
             }
         } else {
-            tfel = getGene(model, tfGenes.iterator().next());
+            tfel = getProtein(model, tfGenes.iterator().next());
         }
         assert tfel != null;
 
-        for (Object o : annotation.getGeneSet(true).getMembers()) {
-            String tSymbol = o.toString();
+        TemplateReactionRegulation regulation
+                = model.addNew(TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
+        regulation.addController(tfel);
+        regulation.setControlType(ControlType.ACTIVATION);
+        regulation.setDisplayName(annotation.getStandardName());
+        regulation.setStandardName(annotation.getLSIDName());
+        regulation.addComment(annotation.getDescription().getBrief());
+//        if(!annotation.getDescription().getFull().isEmpty())
+//            regulation.addComment(annotation.getDescription().getFull());
+        regulation.addComment(annotation.getCategory().getCode());
+        regulation.addComment(annotation.getCategory().getName());
 
+        for (Object o : annotation.getGeneSet(true).getMembers())
+        {
+            String tSymbol = o.toString();
             Set<Gene> genes = hgncUtil.getGenes(tSymbol);
             if(genes == null) { continue; }
-
             for (Gene gene : genes) {
-                TemplateReactionRegulation regulation
-                        = create(TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
-                model.add(regulation);
-                regulation.addController(tfel);
-                String rname = annotation.getStandardName();
-                regulation.setControlType(ControlType.ACTIVATION);
-                regulation.setStandardName(rname);
-                regulation.setDisplayName(rname);
-                regulation.addName(rname);
-                pathway.addPathwayComponent(regulation);
-
-                Rna target = getGene(model, gene);
-                TemplateReaction transcription = getTranscriptionOf(model, target);
+                TemplateReaction transcription = getTranscriptionOf(model, gene);
                 regulation.addControlled(transcription);
-                pathway.addPathwayComponent(transcription);
             }
         }
-
-
-        return pathway;
     }
 
-    private Rna getGenericGene(Model model, String name) {
-        String nid = name + "_" + UUID.randomUUID();
-        Rna rna = create(Rna.class, completeId("generic_" + nid));
-        model.add(rna);
-        rna.setDisplayName(name);
-        rna.addName(name);
-        rna.setStandardName(name);
+    private Protein getGenericProtein(Model model, String name) {
+        String nid = name;
+        Protein prot = create(Protein.class, completeId("generic_protein_" + nid));
+        model.add(prot);
+        prot.setDisplayName(name);
+        prot.addName(name);
+        prot.setStandardName(name);
 
-        RnaReference rnaReference = create(RnaReference.class, completeId("generic_ref" + nid));
-        model.add(rnaReference);
-        rnaReference.setStandardName(name);
-        rnaReference.setDisplayName(name);
-        rnaReference.addName(name);
+        ProteinReference protReference = create(ProteinReference.class, completeId("generic_proteinref" + nid));
+        model.add(protReference);
+        protReference.setStandardName(name);
+        protReference.setDisplayName(name);
+        protReference.addName(name);
 
-        rna.setEntityReference(rnaReference);
+        prot.setEntityReference(protReference);
 
-        return rna;
+        return prot;
     }
 
-    private TemplateReaction getTranscriptionOf(Model model, Rna target) {
+    private TemplateReaction getTranscriptionOf(Model model, Gene gene) {
+        Rna target = getRna(model, gene);
         // Make these transcription events unique
         String id = "transcription_" + target.getDisplayName() + "_" + UUID.randomUUID();
         TemplateReaction templateReaction = (TemplateReaction) model.getByID(completeId(id));
@@ -191,53 +176,71 @@ public class MsigdbToBiopaxConverter {
             templateReaction.addProduct(target);
             templateReaction.setTemplateDirection(TemplateDirectionType.FORWARD);
         }
-
         return templateReaction;
     }
 
-    private Rna getGene(Model model, Gene gene) {
-        String id = gene.toString();
-        Rna rna = (Rna) model.getByID(completeId(id));
+    private Rna getRna(Model model, Gene gene) {
+        String uri = completeId("rna_" + gene.toString());
+        Rna rna = (Rna) model.getByID(uri);
         if(rna == null) {
-            rna = createGene(model, gene);
+            rna = create(Rna.class, uri);
+            model.add(rna);
+            setNames(gene, rna);
+            RnaReference rnaReference = create(RnaReference.class, completeId("rnaref_" + gene.toString()));
+            model.add(rnaReference);
+            setNames(gene, rnaReference);
+            assignXrefs(model, gene, rnaReference);
+            rna.setEntityReference(rnaReference);
         }
         return rna;
     }
 
-    private Rna createGene(Model model, Gene gene) {
-        Rna rna = create(Rna.class, completeId(gene.toString()));
-        model.add(rna);
-        setNames(gene, rna);
+    private Protein getProtein(Model model, Gene gene)
+    {
+        String uri = completeId("protein_" + gene.toString());
+        Protein protein = (Protein) model.getByID(uri);
+        if(protein == null) {
+            protein = create(Protein.class, uri);
+            model.add(protein);
+            setNames(gene, protein);
+            ProteinReference proteinReference = create(ProteinReference.class,
+                    completeId("proteinref_" + gene.toString()));
+            model.add(proteinReference);
+            setNames(gene, proteinReference);
+            assignXrefs(model, gene, proteinReference);
+            protein.setEntityReference(proteinReference);
+        }
 
-        RnaReference rnaReference = create(RnaReference.class, completeId("ref" + gene.toString()));
-        model.add(rnaReference);
-        setNames(gene, rnaReference);
-        assignXrefs(model, gene, rnaReference);
-
-        rna.setEntityReference(rnaReference);
-
-        return rna;
+        return protein;
     }
 
-    private void assignXrefs(Model model, Gene gene, RnaReference rnaReference) {
-        String geneStr = gene.toString() + "_" + UUID.randomUUID();
-        UnificationXref unificationXref = create(UnificationXref.class, completeId("uxref_" + geneStr));
-        model.add(unificationXref);
-        unificationXref.setDb("NCBI Gene");
-        unificationXref.setId(gene.getEntrezId());
-        rnaReference.addXref(unificationXref);
+    private void assignXrefs(Model model, Gene gene, EntityReference entityReference) {
+        String uri = completeId("rxref_geneid_" + gene.getEntrezId());
+        RelationshipXref relationshipXref = (RelationshipXref)model.getByID(uri);
+        if (relationshipXref == null) {
+            relationshipXref = model.addNew(RelationshipXref.class, uri);
+            relationshipXref.setDb("NCBI Gene");
+            relationshipXref.setId(gene.getEntrezId());
+        }
+        entityReference.addXref(relationshipXref);
 
-        RelationshipXref relationshipXref = create(RelationshipXref.class, completeId("rxref_" + geneStr));
-        model.add(relationshipXref);
-        relationshipXref.setDb("HGNC");
-        relationshipXref.setId(gene.getHgncId());
-        rnaReference.addXref(relationshipXref);
+        uri =  completeId("rxref_hgnc_" + gene.getHgncId());
+        relationshipXref = (RelationshipXref)model.getByID(uri);
+        if (relationshipXref == null) {
+            relationshipXref = model.addNew(RelationshipXref.class, uri);
+            relationshipXref.setDb("HGNC");
+            relationshipXref.setId(gene.getHgncId());
+        }
+        entityReference.addXref(relationshipXref);
 
-        RelationshipXref symbolXref = create(RelationshipXref.class, completeId("rxref_symbol_" + geneStr));
-        model.add(symbolXref);
-        symbolXref.setDb("HGNC Symbol");
-        symbolXref.setId(gene.getSymbol());
-        rnaReference.addXref(symbolXref);
+        uri =  completeId("rxref_symbol_" + gene.getSymbol());
+        relationshipXref = (RelationshipXref)model.getByID(uri);
+        if (relationshipXref == null) {
+            relationshipXref = model.addNew(RelationshipXref.class, uri);
+            relationshipXref.setDb("HGNC Symbol");
+            relationshipXref.setId(gene.getSymbol());
+        }
+        entityReference.addXref(relationshipXref);
     }
 
     private void setNames(Gene gene, Named named) {
