@@ -130,6 +130,9 @@ public class MsigdbToBiopaxConverter {
         regulation.addComment(annotation.getCategory().getCode());
         regulation.addComment(annotation.getCategory().getName());
 
+//TODO: use annotation.getExternalLinks(), e.g. getPMID(), create/add PublicationXrefs
+//      addXrefs(regulation, annotation..getExternalLinks());
+
         for (Object o : annotation.getGeneSet(true).getMembers())
         {
             String tSymbol = o.toString();
