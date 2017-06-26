@@ -122,7 +122,7 @@ public class MsigdbToBiopaxConverter {
                 = model.addNew(TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
         regulation.addController(tfel);
         regulation.setControlType(ControlType.ACTIVATION);
-        regulation.setDisplayName(annotation.getStandardName());
+        regulation.setDisplayName(annotation.getStandardName().replaceFirst("V\\$",""));
         regulation.setStandardName(annotation.getLSIDName());
         regulation.addComment(annotation.getDescription().getBrief());
 //        if(!annotation.getDescription().getFull().isEmpty())

@@ -17,6 +17,8 @@ public class MsigdbToBiopaxConverterTest {
         assertFalse(m.getObjects(Protein.class).isEmpty());
         assertEquals(1, m.getObjects(Protein.class).size());
         assertEquals(1, m.getObjects(TemplateReactionRegulation.class).size());
+        TemplateReactionRegulation trr = m.getObjects(TemplateReactionRegulation.class).iterator().next();
+        assertEquals("HOX13_01",trr.getDisplayName()); //'V$' - orig. prefix was removed
         assertTrue(m.getObjects(Pathway.class).isEmpty()); //no pathways get generated anymore!
     }
 }
