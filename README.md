@@ -70,15 +70,10 @@ To compile the code and create an executable JAR file, run:
 You can then run the converter as follows:
 
 	$ java -jar target/msigdb-to-biopax.jar 
-	Usage: MsigdbToBiopax /path/to/msigdb_v4.0.xml /path/to/output.owl
+	Usage: MsigdbToBiopax /path/to/msigdb_v5.2.xml /path/to/output.owl
 
-For the conversion, you need to download the MSigDB database as an XML file: [msigdb_v4.0.xml](http://www.broadinstitute.org/gsea/msigdb/download_file.jsp?filePath=/resources/msigdb/4.0/msigdb_v4.0.xml).
+For the conversion, you need to download the MSigDB database as an XML file: [msigdb_v5.2.xml](http://www.broadinstitute.org/gsea/msigdb/download_file.jsp?filePath=/resources/msigdb/5.2/msigdb_v5.2.xml).
 Once downloaded, you can convert this into BioPAX as follows:
 
 	$ java -jar msigdb-to-biopax.jar msigdb_v4.0.xml msigdb_v4.0.owl
 
-You can download the converted model from the Downloads: [goal5_msigdb_c3_tft-20140802.owl.gz](https://bitbucket.org/armish/gsoc14/downloads/goal5_msigdb_c3_tft-20140802.owl.gz).
-
-### Validation results
-The validation report for the fully converted model is available here: [goal5_validationResults-20130802.zip](https://bitbucket.org/armish/gsoc14/downloads/goal5_validationResults-20130802.zip).
-The BioPAX model does not have any major validation warnings or errors, hence is pretty clean.
