@@ -12,7 +12,8 @@ public class MsigdbToBiopax {
         if(args.length < 2) {
             System.err.println(
                     "Missing options.\n"
-                    + "Usage: MsigdbToBiopax /path/to/msigdb_v4.0.xml /path/to/output.owl"
+                    + "Usage: MsigdbToBiopax /path/to/msigdb_v5.2.xml /path/to/output.owl\n" +
+                      "(does not work for msigdb_v6.x, which does not have TF gene symbols in the description)"
             );
             System.exit(-1);
         }
