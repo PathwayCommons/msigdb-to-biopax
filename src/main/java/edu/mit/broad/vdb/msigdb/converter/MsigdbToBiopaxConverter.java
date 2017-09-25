@@ -105,7 +105,7 @@ public class MsigdbToBiopaxConverter {
         }
 
         //create a TF
-        Protein tfel;
+        final Protein tfel;
         if(tfGenes.size() > 1) {
             // If more than one matches, then create a generic entity
             tfel = getGenericProtein(model, symbol);
@@ -118,18 +118,6 @@ public class MsigdbToBiopaxConverter {
         }
         assert tfel != null;
 
-        TemplateReactionRegulation regulation
-                = model.addNew(TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
-        regulation.addController(tfel);
-        regulation.setControlType(ControlType.ACTIVATION);
-        regulation.setDisplayName(annotation.getStandardName().replaceFirst("V\\$",""));
-        regulation.setStandardName(annotation.getLSIDName());
-        regulation.addComment(annotation.getDescription().getBrief());
-//        if(!annotation.getDescription().getFull().isEmpty())
-//            regulation.addComment(annotation.getDescription().getFull());
-        regulation.addComment(annotation.getCategory().getCode());
-        regulation.addComment(annotation.getCategory().getName());
-
 //TODO: use annotation.getExternalLinks(), e.g. getPMID(), create/add PublicationXrefs
 //      addXrefs(regulation, annotation..getExternalLinks());
 
@@ -137,10 +125,22 @@ public class MsigdbToBiopaxConverter {
         {
             String tSymbol = o.toString();
             Set<Gene> genes = hgncUtil.getGenes(tSymbol);
-            if(genes == null) { continue; }
-            for (Gene gene : genes) {
-                TemplateReaction transcription = getTranscriptionOf(model, gene);
-                regulation.addControlled(transcription);
+            if(genes != null) {
+                for (Gene gene : genes) {
+                    TemplateReactionRegulation regulation = model.addNew(
+                            TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
+                    regulation.addController(tfel);
+//        regulation.setControlType(ControlType.ACTIVATION); //unknown
+                    regulation.setDisplayName(annotation.getStandardName().replaceFirst("V\\$",""));
+                    regulation.setStandardName(annotation.getLSIDName());
+                    regulation.addComment(annotation.getDescription().getBrief());
+//        if(!annotation.getDescription().getFull().isEmpty())
+//            regulation.addComment(annotation.getDescription().getFull());
+                    regulation.addComment(annotation.getCategory().getCode());
+                    regulation.addComment(annotation.getCategory().getName());
+                    TemplateReaction transcription = getTranscriptionOf(model, gene);
+                    regulation.addControlled(transcription);
+                }
             }
         }
     }
