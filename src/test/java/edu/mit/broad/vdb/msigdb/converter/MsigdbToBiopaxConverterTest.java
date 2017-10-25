@@ -15,10 +15,11 @@ public class MsigdbToBiopaxConverterTest {
                 .convert("msigdb5-test.xml", getClass().getResourceAsStream("/msigdb5-test.xml"));
         assertNotNull(m);
         assertFalse(m.getObjects(Protein.class).isEmpty());
-        assertEquals(1, m.getObjects(Protein.class).size());
-        assertEquals(43, m.getObjects(TemplateReactionRegulation.class).size());
+        assertEquals(2, m.getObjects(Protein.class).size());
+        assertEquals(212, m.getObjects(TemplateReactionRegulation.class).size());
         TemplateReactionRegulation trr = m.getObjects(TemplateReactionRegulation.class).iterator().next();
-        assertEquals("HOX13_01",trr.getDisplayName()); //'V$' - orig. prefix was removed
+        String dname = trr.getDisplayName();
+        assertTrue("HOX13_01".equals(dname) || "SGCGSSAAA_E2F1DP2_01".equals(dname)); //'V$' - orig. prefix was removed
         assertEquals(1,trr.getControlled().size()); //only one process is allowed (functional property)!
         assertTrue(m.getObjects(Pathway.class).isEmpty()); //no pathways get generated anymore!
     }
