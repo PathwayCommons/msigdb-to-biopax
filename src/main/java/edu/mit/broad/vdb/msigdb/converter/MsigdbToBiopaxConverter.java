@@ -13,12 +13,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MsigdbToBiopaxConverter {
     private static Logger log = LoggerFactory.getLogger(MsigdbToBiopaxConverter.class);
-    private final String symbolPattern = ".* (\\w+): .*";
+
+    final static String WMAF = "which matches annotation for ";
+    final static Pattern symbolPattern = Pattern.compile("(\\w+):");
 
     private String XMLBase = "http://www.gene-regulation.com/#";
 
@@ -56,15 +61,14 @@ public class MsigdbToBiopaxConverter {
 
     public Model convert(final String fileName, final InputStream msigdbInputStream) throws Exception {
         Model model = getBioPAXFactory().createModel();
+        model.setXmlBase(getXMLBase());
         MSigDB mSigDB = ParserFactory.readMSigDB(fileName, msigdbInputStream, true, true);
         log.info("Read the msigdb file: " + mSigDB.getNumGeneSets() + " gene sets in the file.");
 
         int cnt=0;
         final int numAnnotations = mSigDB.getNumGeneSets();
-        for (int i=0; i < numAnnotations; i++)
-        {
+        for (int i=0; i < numAnnotations; i++) {
             GeneSetAnnotation annotation = mSigDB.getGeneSetAnnotation(i);
-
             GeneSetCategory category = annotation.getCategory();
             // We are going to get only c3 human TFT (motif) gene sets
             if(category.getCode().equalsIgnoreCase("c3")
@@ -72,17 +76,17 @@ public class MsigdbToBiopaxConverter {
                  && annotation.getOrganism().getName().equalsIgnoreCase("homo sapiens"))
             {
                 String briefDesc = annotation.getDescription().getBrief();
-                if(briefDesc.contains("which matches annotation for")) { //TODO: won't work with MSigDB v6.0
-                    if(briefDesc.matches(symbolPattern)) {
-                        String symbol = briefDesc.replaceAll(symbolPattern, "$1");
-                        convertGeneSet(model, symbol, annotation);
-                        cnt++;
-                    }
+                int pos = briefDesc.indexOf(WMAF); //TODO: does NOT work for MSigDB v6.x
+                if(pos > 0) {
+                    //extract TF names after the sub-string:
+                    Matcher matcher = symbolPattern.matcher(briefDesc.substring(pos + WMAF.length()));
+                    Set<String> symbols = new HashSet<String>();
+                    while(matcher.find()) symbols.add(matcher.group(1));
+                    convertGeneSet(model, symbols, annotation);
+                    cnt++;
                 }
             }
         }
-
-        model.setXmlBase(getXMLBase());
 
         log.info("Converted " + cnt + " gene sets to a BioPAX sub-network.");
         return model;
@@ -96,27 +100,30 @@ public class MsigdbToBiopaxConverter {
         return getXMLBase() + partialId;
     }
 
-    private void convertGeneSet(Model model, String symbol, GeneSetAnnotation annotation)
+    private void convertGeneSet(Model model, Set<String> tfSymbols, GeneSetAnnotation annotation)
     {
-        Set<Gene> tfGenes = hgncUtil.getGenes(symbol);
-        if(tfGenes == null) {
-            log.warn("Couldn't find transcription factor: " + symbol);
-            return;
-        }
-
-        //create a TF
-        final Protein tfel;
-        if(tfGenes.size() > 1) {
-            // If more than one matches, then create a generic entity
-            tfel = getGenericProtein(model, symbol);
-            for (Gene tfGene : tfGenes) {
-                Protein member = getProtein(model, tfGene);
-                tfel.getEntityReference().addMemberEntityReference(member.getEntityReference());
+        // Map TF names to Proteins - to be controllers of the TemplateReactionRegulations
+        final Set<Protein> controllers = new HashSet<Protein>();
+        for(String symbol: tfSymbols) {
+            Set<Gene> tfGenes = hgncUtil.getGenes(symbol);
+            if (tfGenes == null) {
+                log.warn("Couldn't find transcription factor: " + symbol);
+                continue;
             }
-        } else {
-            tfel = getProtein(model, tfGenes.iterator().next());
+            //create a TF
+            final Protein tfel;
+            if (tfGenes.size() > 1) {
+                // If more than one matches, then create a generic entity
+                tfel = getGenericProtein(model, symbol);
+                for (Gene tfGene : tfGenes) {
+                    Protein member = getProtein(model, tfGene);
+                    tfel.getEntityReference().addMemberEntityReference(member.getEntityReference());
+                }
+            } else {
+                tfel = getProtein(model, tfGenes.iterator().next());
+            }
+            controllers.add(tfel);
         }
-        assert tfel != null;
 
 //TODO: use annotation.getExternalLinks(), e.g. getPMID(), create/add PublicationXrefs
 //      addXrefs(regulation, annotation..getExternalLinks());
@@ -129,8 +136,9 @@ public class MsigdbToBiopaxConverter {
                 for (Gene gene : genes) {
                     TemplateReactionRegulation regulation = model.addNew(
                             TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
-                    regulation.addController(tfel);
-//        regulation.setControlType(ControlType.ACTIVATION); //unknown
+                    for(Protein tfel: controllers)
+                        regulation.addController(tfel);
+//        regulation.setControlType(ControlType.ACTIVATION); //don't set - it's in fact unknown
                     regulation.setDisplayName(annotation.getStandardName().replaceFirst("V\\$",""));
                     regulation.setStandardName(annotation.getLSIDName());
                     regulation.addComment(annotation.getDescription().getBrief());
@@ -139,7 +147,7 @@ public class MsigdbToBiopaxConverter {
                     regulation.addComment(annotation.getCategory().getCode());
                     regulation.addComment(annotation.getCategory().getName());
                     TemplateReaction transcription = getTranscriptionOf(model, gene);
-                    regulation.addControlled(transcription);
+                    regulation.addControlled(transcription);//max. one value is allowed (according to the BioPAX spec.)
                 }
             }
         }
