@@ -106,33 +106,29 @@ public class MsigdbToBiopaxConverter {
         final Set<Protein> controllers = new HashSet<Protein>();
         for(String symbol: tfSymbols) {
             Set<Gene> tfGenes = hgncUtil.getGenes(symbol);
-            if (tfGenes == null) {
+            if (tfGenes.isEmpty()) {
                 log.warn("Couldn't find transcription factor: " + symbol);
-                continue;
-            }
-            //create a TF
-            final Protein tfel;
-            if (tfGenes.size() > 1) {
+            } else if (tfGenes.size() > 1) {
                 // If more than one matches, then create a generic entity
-                tfel = getGenericProtein(model, symbol);
+                Protein tfel = getGenericProtein(model, symbol);
                 for (Gene tfGene : tfGenes) {
                     Protein member = getProtein(model, tfGene);
                     tfel.getEntityReference().addMemberEntityReference(member.getEntityReference());
                 }
+                controllers.add(tfel);
             } else {
-                tfel = getProtein(model, tfGenes.iterator().next());
+                Protein tfel = getProtein(model, tfGenes.iterator().next());
+                controllers.add(tfel);
             }
-            controllers.add(tfel);
         }
 
 //TODO: use annotation.getExternalLinks(), e.g. getPMID(), create/add PublicationXrefs
 //      addXrefs(regulation, annotation..getExternalLinks());
-
         for (Object o : annotation.getGeneSet(true).getMembers())
         {
             String tSymbol = o.toString();
             Set<Gene> genes = hgncUtil.getGenes(tSymbol);
-            if(genes != null) {
+            if(!genes.isEmpty()) {
                 for (Gene gene : genes) {
                     TemplateReactionRegulation regulation = model.addNew(
                             TemplateReactionRegulation.class, completeId("control_" + UUID.randomUUID()));
