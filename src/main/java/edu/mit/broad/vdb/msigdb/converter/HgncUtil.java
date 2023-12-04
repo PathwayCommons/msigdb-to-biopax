@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.util.*;
 
 public class HgncUtil {
-    private Map<String, Set<Gene>> symbol2gene = new HashMap<String, Set<Gene>>();
-    private Map<String, Set<Gene>> synonym2gene = new HashMap<String, Set<Gene>>();
+    private Map<String, Set<Gene>> symbol2gene = new HashMap<>();
+    private Map<String, Set<Gene>> synonym2gene = new HashMap<>();
 
     public HgncUtil() {
         InputStream inputStream = this.getClass().getResourceAsStream("/hgnc_custom_download.tsv");

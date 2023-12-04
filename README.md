@@ -42,22 +42,13 @@ This information is captured via `TemplateReaction`s where target `Rna`s
 are being produced, and the reaction itself is being regulated by the 
 transcription factor via `TemplateReactionRegulation`.
 
-Below is a screenshot that shows a sample gene set converted into a `Pathway`:
-
-![EVI1 targets as a BioPAX pathway](https://bitbucket.org/armish/gsoc14/downloads/goal5_screenshot_singlegeneset.png)
-
 ### Usage
 This project uses the MIT GSEA java library (gsea2-2*.jar), which is not open source (as well as 
 [MSigDB](http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/MSigDB_Acknowledgements) data); see 
 [GSEA/MSigDB licence](http://software.broadinstitute.org/gsea/msigdb/download_file.jsp?filePath=/resources/licenses/gsea_msigdb_license.txt)
 and [this wiki page](http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/MSigDB_License) .
-So, one should first register there to download software and/or data at http://software.broadinstitute.org/gsea/downloads.jsp
-
-Next, fix and install the gsea2 jar into your local Maven2 repository (~/.m2/repository) with `mvn` command:
-```
-zip --delete gsea2-2.2.3.jar "junit/*"
-mvn install:install-file -DgroupId=edu.mit.broad -DartifactId=gsea2 -Dversion=2.2.3 -Dfile=gsea2-2.2.3.jar -Dpackaging=jar
-```
+So, we downloaded the software at http://software.broadinstitute.org/gsea/downloads.jsp and added to the `lib` folder 
+(we also manually removed the junit package from that jar).
 
 Check out (git clone) the repository, change to:
 

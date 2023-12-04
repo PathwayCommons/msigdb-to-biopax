@@ -80,7 +80,7 @@ public class MsigdbToBiopaxConverter {
                 if(pos > 0) {
                     //extract TF names after the sub-string:
                     Matcher matcher = symbolPattern.matcher(briefDesc.substring(pos + WMAF.length()));
-                    Set<String> symbols = new HashSet<String>();
+                    Set<String> symbols = new HashSet<>();
                     while(matcher.find()) symbols.add(matcher.group(1));
                     convertGeneSet(model, symbols, annotation);
                     cnt++;
@@ -103,7 +103,7 @@ public class MsigdbToBiopaxConverter {
     private void convertGeneSet(Model model, Set<String> tfSymbols, GeneSetAnnotation annotation)
     {
         // Map TF names to Proteins - to be controllers of the TemplateReactionRegulations
-        final Set<Protein> controllers = new HashSet<Protein>();
+        final Set<Protein> controllers = new HashSet<>();
         for(String symbol: tfSymbols) {
             Set<Gene> tfGenes = hgncUtil.getGenes(symbol);
             if (tfGenes.isEmpty()) {
@@ -211,7 +211,7 @@ public class MsigdbToBiopaxConverter {
             model.add(protein);
             setNames(gene, protein);
             ProteinReference proteinReference = create(ProteinReference.class,
-                    completeId("proteinref_" + gene.toString()));
+                    completeId("proteinref_" + gene));
             model.add(proteinReference);
             setNames(gene, proteinReference);
             assignXrefs(model, gene, proteinReference);
