@@ -75,5 +75,5 @@ You can then run the converter as follows:
 For the conversion, you need to download the MSigDB database as an XML file: [msigdb_v5.2.xml](http://www.broadinstitute.org/gsea/msigdb/download_file.jsp?filePath=/resources/msigdb/5.2/msigdb_v5.2.xml).
 Once downloaded, you can convert this into BioPAX as follows:
 
-	$ java -jar msigdb-to-biopax.jar msigdb_v4.0.xml msigdb_v4.0.owl
+	$ java -jar msigdb-to-biopax.jar msigdb_v5.2.xml msigdb_v5.2.owl
 
