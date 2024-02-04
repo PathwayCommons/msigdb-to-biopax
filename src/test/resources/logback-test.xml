@@ -12,9 +12,7 @@
     </encoder>
   </appender>
 
-  <logger name="edu.mit.broad.vdb.msigdb" level="info" />
-
-  <root level="warn">
+  <root level="info">
     <appender-ref ref="console" />
   </root>
 
